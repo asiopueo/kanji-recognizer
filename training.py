@@ -27,19 +27,20 @@ getter_va = Minibatches(100, default=x_va, targets=y_va)
 
 ########### Network ##############
 inp, jis = bs.tools.get_in_out_layers('classification', (63,64,1), 320, projection_name='JIS')
+
 network = bs.Network.from_layer(
 	inp >> 
 	bs.layers.Dropout(drop_prob=0.2) >>
-	bs.layers.Convolution2D(32, kernel_size=(3, 3), padding=2, name='ConvolutionLayer1') >>
-	bs.layers.Pooling2D(type="max", kernel_size=(2, 2), stride=(2, 2)) >>
-	bs.layers.Convolution2D(32, kernel_size=(3, 3), padding=2, name='ConvolutionLayer2') >>
-	bs.layers.Pooling2D(type="max", kernel_size=(2, 2), stride=(2, 2)) >>
-	bs.layers.Convolution2D(64, kernel_size=(3, 3), padding=2, name='ConvolutionLayer1') >>
-	bs.layers.Pooling2D(type="max", kernel_size=(3, 3), stride=(2, 2)) >>
-	bs.layers.FullyConnected(1200, name='HiddenLayer', activation='rel') >>
+	bs.layers.FullyConnected(3000, name='HiddenLayer_1', activation='rel') >>
+	bs.layers.Dropout(drop_prob=0.5) >>
+	bs.layers.FullyConnected(3000, name='HiddenLayer_2', activation='rel') >>
+	bs.layers.Dropout(drop_prob=0.5) >>
+	bs.layers.FullyConnected(3000, name='HiddenLayer_3', activation='rel') >>
 	bs.layers.Dropout(drop_prob=0.5) >>
 	jis
 )
+
+#network = bs.Network.from_hdf5(C1_best_network)
 
 network.set_handler(PyCudaHandler())
 network.initialize(bs.initializers.Gaussian(0.01))
@@ -53,7 +54,7 @@ trainer.add_hook(bs.hooks.ProgressBar())
 scorers = [bs.scorers.Accuracy(out_name='Output.outputs.predictions')]
 trainer.add_hook(bs.hooks.MonitorScores('valid_getter', scorers, name='validation'))
 trainer.add_hook(bs.hooks.SaveBestNetwork('validation.Accuracy', filename='C1_best_network.hdf5', name='best weights', criterion='max'))
-trainer.add_hook(bs.hooks.StopAfterEpoch(30))
+trainer.add_hook(bs.hooks.StopAfterEpoch(200))
 
 
 
@@ -63,4 +64,18 @@ print "Best validation accuracy:", max(trainer.logs["validation"]["Accuracy"])
 
 
 
-
+"""
+network = bs.Network.from_layer(
+	inp >> 
+	bs.layers.Dropout(drop_prob=0.2) >>
+	bs.layers.Convolution2D(32, kernel_size=(3, 3), padding=2, name='ConvolutionLayer1') >>
+	bs.layers.Pooling2D(type="max", kernel_size=(2, 2), stride=(2, 2)) >>
+	bs.layers.Convolution2D(32, kernel_size=(3, 3), padding=2, name='ConvolutionLayer2') >>
+	bs.layers.Pooling2D(type="max", kernel_size=(2, 2), stride=(2, 2)) >>
+	bs.layers.Convolution2D(64, kernel_size=(3, 3), padding=2, name='ConvolutionLayer1') >>
+	bs.layers.Pooling2D(type="max", kernel_size=(3, 3), stride=(2, 2)) >>
+	bs.layers.FullyConnected(1200, name='HiddenLayer', activation='rel') >>
+	bs.layers.Dropout(drop_prob=0.5) >>
+	jis
+)
+"""

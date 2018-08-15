@@ -1,0 +1,10 @@
+MNIST_samples/
+hdf5_data/
+data/
+backup/
+testbed/
+*.jpg
+
+
+
+

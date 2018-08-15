@@ -7,19 +7,6 @@ from time import time
 
 import h5py
 
-SIZE_X = 64
-SIZE_Y = 63
-
-SAMPLE_WIDTH = 512
-TOTAL_RECORDS = 51200
-#TOTAL_RECORDS = 50560
-#320+320+316=956
-
-DATA_FILE = "data/ETL8B/ETL8B2C1"
-OUTPUT_FILE = "testC1_normalized.hdf5"
-
-
-
 
 
 class KutenDictionary(dict):
@@ -84,13 +71,23 @@ def progress_bar(counter):
 
 
 
-#sample = int(sys.argv[1])
+SIZE_X = 64
+SIZE_Y = 63
+
+SAMPLE_WIDTH = 512
+TOTAL_RECORDS = 51200
+#TOTAL_RECORDS = 50560
+#320+320+316=956
+
+DATA_FILE = "data/ETL8B/ETL8B2C1"
+OUTPUT_FILE = "hdf5_data/testC1_normalized.hdf5"
 
 
 
-file_handle = open(DATA_FILE, 'rb')
-byte_buffer = file_handle.read( (TOTAL_RECORDS+1)*SAMPLE_WIDTH )
-file_handle.close()
+
+with open(DATA_FILE, 'rb') as file_handle:
+	byte_buffer = file_handle.read( (TOTAL_RECORDS+1) * SAMPLE_WIDTH )
+
 
 
 print "Creating KuTen-dictionary..."
