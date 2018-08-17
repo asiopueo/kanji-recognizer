@@ -53,11 +53,12 @@ def reader(counter):
 
 
 def string_to_array(tmp_str):
-	array = np.eye(SIZE_Y, SIZE_X).astype('uint8')
+	#array = np.eye(SIZE_Y, SIZE_X).astype('uint8')
+	array = np.zeros(shape=(SIZE_Y+1, SIZE_X), dtype='uint8')
 
-	for i in range(SIZE_Y):
+	for i in range(1, SIZE_Y):
 		for j in range(SIZE_X):
-			array[i][j] = int(tmp_str[i*SIZE_X+j]) # * 255
+			array[i][j] = int(tmp_str[i*SIZE_X+j])
 
 	return array
 
@@ -102,9 +103,9 @@ t0 = time()
 print "Creating hdf5-file..."
 
 # Using int() in order to avoid 'numpy deprecation warnings'
-features_training = np.ndarray(shape=(int(TOTAL_RECORDS*0.9), SIZE_Y, SIZE_X))
+features_training = np.ndarray(shape=(int(TOTAL_RECORDS*0.9), SIZE_Y+1, SIZE_X))
 labels_training = np.ndarray(shape=(int(TOTAL_RECORDS*0.9), 1))
-features_validation = np.ndarray(shape=(int(TOTAL_RECORDS*0.1), SIZE_Y, SIZE_X))
+features_validation = np.ndarray(shape=(int(TOTAL_RECORDS*0.1), SIZE_Y+1, SIZE_X))
 labels_validation = np.ndarray(shape=(int(TOTAL_RECORDS*0.1), 1))
 
 
@@ -132,17 +133,25 @@ for counter in range(TOTAL_RECORDS):
 
 print "Creation time:" , round(time()-t0, 3), "seconds"
 
+# Additional padding was necvessary for Brainstorm for some reason...
+"""
 features_training = features_training.reshape( (1, int(TOTAL_RECORDS*0.9), SIZE_Y, SIZE_X, 1) )
 labels_training = labels_training.reshape( (1, int(TOTAL_RECORDS*0.9), 1) )
 features_validation = features_validation.reshape( (1, int(TOTAL_RECORDS*0.1), SIZE_Y, SIZE_X, 1) )
 labels_validation = labels_validation.reshape( (1, int(TOTAL_RECORDS*0.1), 1) )
+"""
+
+features_training = features_training.reshape( (int(TOTAL_RECORDS*0.9), 1, SIZE_Y+1, SIZE_X) )
+labels_training = labels_training.reshape( (int(TOTAL_RECORDS*0.9)) )
+features_validation = features_validation.reshape( (int(TOTAL_RECORDS*0.1), 1, SIZE_Y+1, SIZE_X) )
+labels_validation = labels_validation.reshape( (int(TOTAL_RECORDS*0.1)) )
+
 
 
 """
 	Define a target variable
 	Export features to .hdf5
 """
-
 
 file_handle = h5py.File(OUTPUT_FILE, "w")
 file_handle.create_dataset('training set/features', data=features_training, compression='gzip')
